@@ -1,4 +1,6 @@
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -11,14 +13,8 @@ def home():
 def ask():
     data = request.json
     question = data.get("question", "")
-
-    # ตอบแบบทดสอบก่อน
     answer = f"คุณถามว่า: {question}"
-
     return jsonify({"answer": answer})
-
-if __name__ == "__main__":
-    import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
