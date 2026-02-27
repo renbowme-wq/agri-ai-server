@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/")
 def home():
@@ -13,9 +16,22 @@ def home():
 def ask():
     data = request.json
     question = data.get("question", "")
-    answer = f"คุณถามว่า: {question}"
-    return jsonify({"answer": answer})
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "คุณคือผู้เชี่ยวชาญด้านการเกษตร ให้คำแนะนำที่เหมาะกับเกษตรกรไทย"},
+                {"role": "user", "content": question}
+            ]
+        )
+
+        answer = response.choices[0].message.content
+        return jsonify({"answer": answer})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run()
